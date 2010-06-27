@@ -13,8 +13,7 @@ Install
 -------
 
     # aptitude install ruby rubygems
-    # gem install bundler
-    # bundle install
+    # gem install eventmachine thin
 
 
 See also
