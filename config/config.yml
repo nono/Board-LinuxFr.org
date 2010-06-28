@@ -1,5 +1,5 @@
 thin:
-  socket: tmp/board.sock
+  socket: ./board.sock
 redis:
   host: localhost
   port: 6379

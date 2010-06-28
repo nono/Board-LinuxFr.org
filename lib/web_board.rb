@@ -1,5 +1,6 @@
 class WebBoard
   AsyncResponse = [-1, {}, []].freeze
+  InvalidResponse = [500, {"Content-Type" => "text/html"}, ["Invalid request"]].freeze
   Header = { "Content-Type" => "text/html; charset=utf8" }.freeze
 
   def self.connect(socket)
@@ -20,8 +21,8 @@ class WebBoard
   def call(env)
     chan = env["PATH_INFO"].to_s
     chan = chan[1, chan.size]
-    return [ 404, Header.dup, ["Unknown board"] ] if chan == ""
-    $stderr.puts "New web client: #{chan}"
+    return InvalidResponse if chan == ""
+    $stderr.puts "New web client: '#{chan}'"
     (@chans[chan] ||= []) << env['async.callback']
     AsyncResponse
   end

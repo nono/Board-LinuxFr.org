@@ -16,16 +16,13 @@ EventMachine::run do
   red.psubscribe("b/*") do |type,_,chan,msg|
     next unless type == "pmessage"
     chan = chan[2, chan.size]
-    $stderr.puts "New message: #{chan} -> #{msg}"
+    $stderr.puts "New message: '#{chan}' -> #{msg}"
     web.message(chan, msg)
-  end
-
-  trap('HUP') do
-    # reload
   end
 
   trap('TERM') do
     # stop
+    $stderr.puts "Closing..."
     red.close_connection_after_writing
     EventMachine.stop if EventMachine.reactor_running?
   end
