@@ -1,12 +1,8 @@
-Boards for LinuxFr.org
-======================
+Board for LinuxFr.org
+=====================
 
-
-TODO
-----
-
-* explain in this file what Boards-LinuxFr.org is
-* Gemfile
+Push the messages in the boards of LinuxFr.org to the browsers
+of the users on them by a long-polling method.
 
 
 Install
@@ -19,7 +15,7 @@ Install
 See also
 --------
 
-* [Git repository](http://github.com/nono/boards-LinuxFr.org)
+* [Git repository](http://github.com/nono/board-LinuxFr.org)
 
 
 Copyright
