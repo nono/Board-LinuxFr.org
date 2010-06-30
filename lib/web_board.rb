@@ -3,15 +3,19 @@ class WebBoard
   InvalidResponse = [500, {"Content-Type" => "text/html"}, ["Invalid request"]].freeze
   Header = { "Content-Type" => "text/html; charset=utf8" }.freeze
 
-  def self.connect(socket)
-    web = self.new
-    Thin::Server.start(socket) do
-      use Rack::CommonLogger
+  def connect(socket, pid_file, log_file)
+    web = self
+    server = Thin::Server.new(socket) do
       map '/b' do
         run web
       end
     end
-    web
+    if pid_file
+      server.pid_file = pid_file
+      server.log_file = log_file
+      server.daemonize
+    end
+    server.start
   end
 
   def initialize

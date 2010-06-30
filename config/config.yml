@@ -1,3 +1,6 @@
+daemonize:
+  pid_file: board.pid
+  log_file: board.log
 thin:
   socket: ./board.sock
 redis:

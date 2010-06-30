@@ -11,8 +11,9 @@ require "web_board"
 
 EventMachine::run do
   cfg = YAML.load_file("config/config.yml")
+  web = WebBoard.new
+  web.connect(cfg["thin"]["socket"], cfg["daemonize"]["pid_file"], cfg["daemonize"]["log_file"])
   red = EventedRedis.connect(cfg["redis"]["host"], cfg["redis"]["port"])
-  web = WebBoard.connect(cfg["thin"]["socket"])
 
   red.psubscribe("b/*") do |type,_,chan,msg|
     next unless type == "pmessage"
