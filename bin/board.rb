@@ -18,7 +18,6 @@ EventMachine::run do
   red.psubscribe("b/*") do |type,_,chan,msg|
     next unless type == "pmessage"
     _,chan,id,kind = chan.split('/')
-    $stderr.puts "New message: '#{chan}' (#{id} / #{kind}) -> #{msg}"
     web.message(chan, id, kind, msg)
   end
 

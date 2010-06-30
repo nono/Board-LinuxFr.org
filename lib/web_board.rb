@@ -1,7 +1,8 @@
 class WebBoard
-  AsyncResponse = [-1, {}, []].freeze
+  AsyncResponse   = [-1, {}, []].freeze
   InvalidResponse = [500, {"Content-Type" => "text/html"}, ["Invalid request"]].freeze
-  Header = { "Content-Type" => "text/html; charset=utf8" }.freeze
+  Header          = { "Content-Type" => "text/html; charset=utf8" }.freeze
+  CacheSize       = 20
 
   def connect(socket, pid_file, log_file)
     web = self
@@ -20,6 +21,7 @@ class WebBoard
 
   def initialize
     @chans = {}
+    @cache = []
   end
 
   def call(env)
@@ -27,15 +29,33 @@ class WebBoard
     chan = chan[1, chan.size]
     return InvalidResponse if chan == ""
     $stderr.puts "New web client: '#{chan}'"
-    (@chans[chan] ||= []) << env['async.callback']
-    AsyncResponse
+    request  = Rack::Request.new(env)
+    messages = in_cache(chan, request['cursor'])
+    if messages.empty?
+      (@chans[chan] ||= []) << env['async.callback']
+      AsyncResponse
+    else
+      respond(messages)
+    end
   end
 
   def message(chan, id, kind, msg)
-    callbacks = @chans.delete(chan) || []
-    callbacks.each do |cb|
-      body = Yajl::Encoder.encode([{:id => id, :kind => kind, :msg => msg}])
-      cb.call [ 200, Header.dup, [body] ]
+    hash = {:id => id, :kind => kind, :msg => msg}
+    @cache << hash.merge(:chan => chan)
+    @cache.unshift if @cache.size > CacheSize
+    (@chans.delete(chan) || []).each do |cb|
+      cb.call respond([hash])
     end
+  end
+
+  def in_cache(chan, id)
+    return [] if @cache.empty?
+    index = @cache.rindex {|e| e[:id] == id } || -2
+    @cache[index + 1, CacheSize].select {|e| e[:chan] == chan}
+  end
+
+  def respond(messages)
+    body = Yajl::Encoder.encode(messages)
+    [ 200, Header.dup, [body] ]
   end
 end
