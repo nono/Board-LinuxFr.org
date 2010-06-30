@@ -9,7 +9,7 @@ Install
 -------
 
     # aptitude install ruby rubygems
-    # gem install eventmachine thin
+    # gem install eventmachine thin yajl-ruby
 
 
 See also

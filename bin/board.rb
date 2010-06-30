@@ -5,6 +5,7 @@ require "yaml"
 require "eventmachine"
 require "evented_redis"
 require "thin"
+require "yajl"
 require "web_board"
 
 
@@ -15,15 +16,10 @@ EventMachine::run do
 
   red.psubscribe("b/*") do |type,_,chan,msg|
     next unless type == "pmessage"
-    chan = chan[2, chan.size]
-    $stderr.puts "New message: '#{chan}' -> #{msg}"
-    web.message(chan, msg)
+    _,chan,id,kind = chan.split('/')
+    $stderr.puts "New message: '#{chan}' (#{id} / #{kind}) -> #{msg}"
+    web.message(chan, id, kind, msg)
   end
 
-  trap('TERM') do
-    # stop
-    $stderr.puts "Closing..."
-    red.close_connection_after_writing
-    EventMachine.stop if EventMachine.reactor_running?
-  end
+  # Don't trap signals, thin already do that
 end

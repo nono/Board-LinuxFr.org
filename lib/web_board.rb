@@ -27,10 +27,11 @@ class WebBoard
     AsyncResponse
   end
 
-  def message(chan, msg)
+  def message(chan, id, kind, msg)
     callbacks = @chans.delete(chan) || []
     callbacks.each do |cb|
-      cb.call [ 200, Header.dup, [msg] ]
+      body = Yajl::Encoder.encode([{:id => id, :kind => kind, :msg => msg}])
+      cb.call [ 200, Header.dup, [body] ]
     end
   end
 end
