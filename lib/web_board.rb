@@ -49,7 +49,7 @@ class WebBoard
   end
 
   def in_cache(chan, id)
-    return [] if @cache.empty?
+    return [] if @cache.empty? || id.nil?
     index = @cache.rindex {|e| e[:id] == id } || -2
     @cache[index + 1, CacheSize].select {|e| e[:chan] == chan}
   end
