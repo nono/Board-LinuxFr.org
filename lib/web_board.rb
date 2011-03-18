@@ -31,8 +31,14 @@ class WebBoard
     $stderr.puts "New web client: '#{chan}'"
     request  = Rack::Request.new(env)
     messages = in_cache(chan, request['cursor'])
+    answered = false
     if messages.empty?
-      (@chans[chan] ||= []) << env['async.callback']
+      (@chans[chan] ||= []) << Proc.new do |x|
+        answered ||= env['async.callback'].call respond(x)
+      end
+      EventMachine::Timer.new(28) do
+        answered ||= env['async.callback'].call([204, Header.dup, [""]])
+      end
       AsyncResponse
     else
       respond(messages)
@@ -44,7 +50,7 @@ class WebBoard
     @cache << hash.merge(:chan => chan)
     @cache.unshift if @cache.size > CacheSize
     (@chans.delete(chan) || []).each do |cb|
-      cb.call respond([hash])
+      cb.call [hash]
     end
   end
 
